@@ -1,7 +1,7 @@
-pub struct Jitoclient;
+pub struct JitoClient;
 
-impl Jitoclient {
-    pub fn new() -> self {
-        Jitoclient
+impl JitoClient {
+    pub fn new() -> Self {
+        JitoClient
     }
 }
