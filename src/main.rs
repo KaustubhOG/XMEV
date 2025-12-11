@@ -1,5 +1,7 @@
 mod utils;
 use crate::utils::run_bot;
+mod jupiter_client;
+
 
 #[tokio::main]
 async fn main() {
