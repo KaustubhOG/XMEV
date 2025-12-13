@@ -1,4 +1,4 @@
-use crate::types::QuoteResponse;
+use crate::types::{QuoteResponse, SwapRequest, SwapResponse};
 use anyhow::Result;
 
 pub struct JupiterClient {
@@ -8,10 +8,8 @@ pub struct JupiterClient {
 
 impl JupiterClient {
     pub fn new() -> Self {
-        let client = reqwest::Client::new();
-
         Self {
-            http_client: client,
+            http_client: reqwest::Client::new(),
             base_url: "https://lite-api.jup.ag/swap/v1".to_string(),
         }
     }
@@ -27,14 +25,31 @@ impl JupiterClient {
             self.base_url, input_mint, output_mint, amount
         );
 
-        let res = self
-            .http_client
-            .get(&url)
+        Ok(self.http_client.get(&url)
+            .send().await?
+            .json::<QuoteResponse>().await?)
+    }
+
+    pub async fn get_swap_tx(
+        &self,
+        quote: QuoteResponse,
+        user_pubkey: &str,
+    ) -> Result<SwapResponse> {
+
+        let url = format!("{}/swap", self.base_url);
+
+        let swap_request = SwapRequest {
+            quote_response: quote,
+            user_public_key: user_pubkey.to_string(),
+            wrap_and_unwrap_sol: true,
+        };
+
+        Ok(self.http_client
+            .post(&url)
+            .json(&swap_request)
             .send()
             .await?
-            .json::<QuoteResponse>()
-            .await?;
-
-        Ok(res)
+            .json::<SwapResponse>()
+            .await?)
     }
 }
